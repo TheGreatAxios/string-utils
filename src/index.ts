@@ -1,50 +1,39 @@
 import { Hono } from 'hono'
-import { createPaidMcpHandler } from 'x402-mcp';
-import { facilitator } from '@coinbase/x402';
-import { z } from 'zod';
+import { createMiddleware } from "@faremeter/middleware/hono";
+import setupMiddleware from './middleware.js';
+import { mcpHandler } from './mcp.js';
+import reverseStringController from './controllers/reverse-string.js';
+import infoController from './controllers/info.js';
 
 const app = new Hono()
 
-const handler = createPaidMcpHandler((server) => {
-  server.paidTool(
-    "reverse_string",
-    "Reverse a string",
-    { price: 0.001 },
-    { str: z.string() },
-    {},
-    async ({ str }) => {
-      return {
-        content: [{
-          type: "text",
-          text: str.split('').reverse().join('')
-        }]
-      }
-    }
-  )
-}, {
-  serverInfo: {
-    name: "String Utils MCP Server",
-    version: "0.1.0"
-  },
-}, {
-  facilitator,
-  recipient: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-  network: "base-sepolia"
-});
+// Setup Middleware
+setupMiddleware(app);
+
 
 app.all("/mcp/*", async(c) => {
-  return await handler(c.req.raw);
-})
+  return await mcpHandler(c.req.raw);
+});
 
-app.get('/', (c) => {
-  return c.json({
-    message: "String Utils MCP Server by https://dirtroad.dev",
-    endpoints: {
-      mcp: "/mcp",
-      description: "MCP Server with key string utilites",
-    },
-    tools: ["reverse_string"]
-  })
-})
+app.use("/tools/*", await createMiddleware({
+  facilitatorURL: "https://facilitator.dirtroad.dev",
+  accepts: [
+    {
+      scheme: "exact",
+      network: "eip155:2140350733",
+      maxAmountRequired: "10000",
+      maxTimeoutSeconds: 5000,
+      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
+      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
+      description: "Reverse a string",
+      mimeType: "application/json"
+    }
+    
+  ],
+}));
+
+app.post("/tools/reverse-string", reverseStringController);
+
+app.get('/', infoController);
 
 export default app
