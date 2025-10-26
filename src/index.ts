@@ -24,6 +24,7 @@ import slugifyController from './controllers/slugify.js';
 import isPalindromeController from './controllers/is-palindrome.js';
 import repeatController from './controllers/repeat.js';
 import infoController from './controllers/info.js';
+import { paymentMiddleware } from 'x402-hono';
 
 const app = new Hono()
 
@@ -35,7 +36,42 @@ app.all("/mcp/*", async(c) => {
   return await mcpHandler(c.req.raw);
 });
 
-app.use("/tools/*", await createMiddleware({
+app.use("/tools/paid/*", paymentMiddleware(
+  "0x71dc0bc68e7f0e2c5aace661b0f3fb995a80aaf4",
+  {
+    "/tools/paid/*": {
+      price: "$0.001",
+      network: "base"
+    }
+  }, {
+    url: "https://facilitator.payai.network"
+  }
+),
+);
+
+app.post("/tools/paid/reverse-string", reverseStringController);
+app.post("/tools/paid/snake-to-camel", snakeToCamelController);
+app.post("/tools/paid/camel-to-snake", camelToSnakeController);
+app.post("/tools/paid/to-uppercase", toUppercaseController);
+app.post("/tools/paid/to-lowercase", toLowercaseController);
+app.post("/tools/paid/capitalize", capitalizeController);
+app.post("/tools/paid/capitalize-first-letter", capitalizeFirstLetterController);
+app.post("/tools/paid/trim", trimController);
+app.post("/tools/paid/contains", containsController);
+app.post("/tools/paid/replace-all", replaceAllController);
+app.post("/tools/paid/count-occurences", countOccurencesController);
+app.post("/tools/paid/starts-with", startsWithController);
+app.post("/tools/paid/ends-with", endsWithController);
+app.post("/tools/paid/substring", substringController);
+app.post("/tools/paid/remove-non-alphanumeric", removeNonAlphanumericController);
+app.post("/tools/paid/normalize-whitespace", normalizeWhitespaceController);
+app.post("/tools/paid/length", lengthController);
+app.post("/tools/paid/truncate", truncateController);
+app.post("/tools/paid/slugify", slugifyController);
+app.post("/tools/paid/is-palindrome", isPalindromeController);
+app.post("/tools/paid/repeat", repeatController);
+
+app.use("/tools/testnet/*", await createMiddleware({
   facilitatorURL: "https://facilitator.dirtroad.dev",
   accepts: [
     {
@@ -43,236 +79,35 @@ app.use("/tools/*", await createMiddleware({
       network: "eip155:2140350733",
       maxAmountRequired: "10000",
       maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
+      payTo: "0x71dc0bc68e7f0e2c5aace661b0f3fb995a80aaf4",
       asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Reverse a string",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Convert snake_case to camelCase",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Convert camelCase to snake_case",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Convert string to uppercase",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Convert string to lowercase",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Capitalize each word in a string",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Capitalize first letter of string",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Trim whitespace from string",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Check if string contains substring",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Replace all occurrences in string",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Count occurrences of substring",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Check if string starts with prefix",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Check if string ends with suffix",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Extract substring from string",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Remove non-alphanumeric characters",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Normalize whitespace in string",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Get string length",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Truncate string to maximum length",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Convert string to URL-friendly slug",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Check if string is a palindrome",
-      mimeType: "application/json"
-    },
-    {
-      scheme: "exact",
-      network: "eip155:2140350733",
-      maxAmountRequired: "10000",
-      maxTimeoutSeconds: 5000,
-      payTo: "0x5b50bcb552825e8753bcb5401528de497ac64e0c",
-      asset: "0x61a26022927096f444994dA1e53F0FD9487EAfcf",
-      description: "Repeat string N times",
+      description: "",
       mimeType: "application/json"
     }
-
   ],
 }));
 
-app.post("/tools/reverse-string", reverseStringController);
-app.post("/tools/snake-to-camel", snakeToCamelController);
-app.post("/tools/camel-to-snake", camelToSnakeController);
-app.post("/tools/to-uppercase", toUppercaseController);
-app.post("/tools/to-lowercase", toLowercaseController);
-app.post("/tools/capitalize", capitalizeController);
-app.post("/tools/capitalize-first-letter", capitalizeFirstLetterController);
-app.post("/tools/trim", trimController);
-app.post("/tools/contains", containsController);
-app.post("/tools/replace-all", replaceAllController);
-app.post("/tools/count-occurences", countOccurencesController);
-app.post("/tools/starts-with", startsWithController);
-app.post("/tools/ends-with", endsWithController);
-app.post("/tools/substring", substringController);
-app.post("/tools/remove-non-alphanumeric", removeNonAlphanumericController);
-app.post("/tools/normalize-whitespace", normalizeWhitespaceController);
-app.post("/tools/length", lengthController);
-app.post("/tools/truncate", truncateController);
-app.post("/tools/slugify", slugifyController);
-app.post("/tools/is-palindrome", isPalindromeController);
-app.post("/tools/repeat", repeatController);
+app.post("/tools/testnet/reverse-string", reverseStringController);
+app.post("/tools/testnet/snake-to-camel", snakeToCamelController);
+app.post("/tools/testnet/camel-to-snake", camelToSnakeController);
+app.post("/tools/testnet/to-uppercase", toUppercaseController);
+app.post("/tools/testnet/to-lowercase", toLowercaseController);
+app.post("/tools/testnet/capitalize", capitalizeController);
+app.post("/tools/testnet/capitalize-first-letter", capitalizeFirstLetterController);
+app.post("/tools/testnet/trim", trimController);
+app.post("/tools/testnet/contains", containsController);
+app.post("/tools/testnet/replace-all", replaceAllController);
+app.post("/tools/testnet/count-occurences", countOccurencesController);
+app.post("/tools/testnet/starts-with", startsWithController);
+app.post("/tools/testnet/ends-with", endsWithController);
+app.post("/tools/testnet/substring", substringController);
+app.post("/tools/testnet/remove-non-alphanumeric", removeNonAlphanumericController);
+app.post("/tools/testnet/normalize-whitespace", normalizeWhitespaceController);
+app.post("/tools/testnet/length", lengthController);
+app.post("/tools/testnet/truncate", truncateController);
+app.post("/tools/testnet/slugify", slugifyController);
+app.post("/tools/testnet/is-palindrome", isPalindromeController);
+app.post("/tools/testnet/repeat", repeatController);
 
 app.get('/', infoController);
 

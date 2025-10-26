@@ -51,8 +51,8 @@ export const mcpHandler = createPaidMcpHandler((server) =>  {
     },
 }, {
     facilitator: {
-        url: FACILITATOR_URL
+        url: "https://facilitator.payai.network" //FACILITATOR_URL
     },
     recipient: RECIPIENT,
-    network: NETWORK as any // override
+    network: "base"// NETWORK as any // override
 });
