@@ -41,10 +41,17 @@ app.use("/tools/paid/*", paymentMiddleware(
   {
     "/tools/paid/*": {
       price: "$0.001",
-      network: "base"
+      network: "base",
+      config: {
+        discoverable: true,
+        description: "String utilites to expand the capabilities of your AI agent",
+      }
     }
   }, {
-    url: "https://facilitator.payai.network"
+    url: "https://facilitator.payai.network",
+  }, {
+    appLogo: "https://dirtroad.dev/logo.svg",
+    appName: "Dirt Road Dev"
   }
 ),
 );
