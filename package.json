@@ -3,6 +3,8 @@
   "type": "module",
   "dependencies": {
     "@coinbase/x402": "^0.6.6",
+    "@faremeter/info": "^0.9.0",
+    "@faremeter/middleware": "^0.9.0",
     "hono": "^4.10.1",
     "x402-mcp": "^0.1.1",
     "zod": "^3.25.76"
